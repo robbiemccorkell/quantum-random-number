@@ -6,9 +6,11 @@ warnings.filterwarnings("ignore")
 
 def parse_input():
   parser=argparse.ArgumentParser()
-  parser.add_argument('max', metavar='n', type=int, nargs=1, help='a maximum integer to generate')
-  args=parser.parse_args()
-  return args.max[0]
+  parser.add_argument('max', metavar='n', type=int, nargs='?', default=16, help='a maximum integer to generate')
+  parser.add_argument('--remote', action='store_true', default=False, help='run command on reale remote quantum processor')
+  args = parser.parse_args()
+  args.max -= 1
+  return args
 
 def bit_from_counts(counts):
     return [k for k, v in counts.items() if v == 1][0]
@@ -33,7 +35,7 @@ def random_int(max):
     bits += bit_from_counts(counts)
   return int(bits, 2)
 
-max = parse_input()
-result = random_int(max)
+input = parse_input()
+result = random_int(input.max)
 
 print(result)
