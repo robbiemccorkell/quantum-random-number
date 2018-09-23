@@ -9,8 +9,16 @@ def parse_input():
   parser.add_argument('max', metavar='n', type=int, nargs='?', default=16, help='a maximum integer to generate')
   parser.add_argument('--remote', action='store_true', default=False, help='run command on reale remote quantum processor')
   args = parser.parse_args()
-  args.max -= 1
+
+  next_power = next_power_of_2(args.max)
+  if (next_power > args.max):
+    print(f"Rounding input {args.max} to next power of 2: {next_power}")
+    args.max = next_power
+
   return args
+
+def next_power_of_2(n):
+  return int(math.pow(2, math.ceil(math.log(n, 2))))
 
 def bit_from_counts(counts):
     return [k for k, v in counts.items() if v == 1][0]
@@ -20,7 +28,7 @@ def num_bits(n):
 
 def random_int(max):
   bits = ''
-  for x in range(num_bits(max)):
+  for x in range(num_bits(max - 1)):
     q = QuantumRegister(1)
     c = ClassicalRegister(1)
     qc = QuantumCircuit(q, c)
