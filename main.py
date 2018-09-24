@@ -4,6 +4,8 @@ from qiskit import QuantumCircuit, ClassicalRegister, QuantumRegister, execute
 
 warnings.filterwarnings("ignore")
 
+MAX_QUBITS = 5
+
 def parse_input():
   parser=argparse.ArgumentParser()
   parser.add_argument('max', metavar='n', type=int, nargs='?', default=16, help='a maximum integer to generate')
@@ -26,14 +28,21 @@ def bit_from_counts(counts):
 def num_bits(n):
   return math.floor(math.log(n, 2)) + 1
 
+def get_register_sizes(n, max_qubits):
+  register_sizes = [max_qubits for i in range(int(n / max_qubits))]
+  remainder = n % max_qubits
+  return register_sizes if remainder == 0 else register_sizes + [remainder]
+
 def random_int(max):
   bits = ''
-  for x in range(num_bits(max - 1)):
-    q = QuantumRegister(1)
-    c = ClassicalRegister(1)
+  n_bits = num_bits(max - 1)
+  register_sizes = get_register_sizes(n_bits, MAX_QUBITS)
+  for x in register_sizes:
+    q = QuantumRegister(x)
+    c = ClassicalRegister(x)
     qc = QuantumCircuit(q, c)
 
-    qc.h(q[0])
+    qc.h(q)
     qc.measure(q, c)
 
     job_sim = execute(qc, "local_qasm_simulator", shots=1)
