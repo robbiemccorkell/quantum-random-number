@@ -1,16 +1,21 @@
 # Import the Qiskit SDK
 import math, argparse, warnings
-from qiskit import QuantumCircuit, ClassicalRegister, QuantumRegister, execute
+from qiskit import QuantumCircuit, ClassicalRegister, QuantumRegister, execute, register
 
 warnings.filterwarnings("ignore")
 
 MAX_QUBITS = 5
+QX_URL = "https://quantumexperience.ng.bluemix.net/api"
 
 def parse_input():
   parser=argparse.ArgumentParser()
   parser.add_argument('max', metavar='n', type=int, nargs='?', default=16, help='a maximum integer to generate')
   parser.add_argument('--remote', action='store_true', default=False, help='run command on reale remote quantum processor')
+  parser.add_argument('--qx-token', nargs='?', help='api token for IBM Q Experience remote backend')
   args = parser.parse_args()
+
+  if args.remote and args.qx_token is None:
+    parser.error("--remote requires --qx-token")
 
   next_power = next_power_of_2(args.max)
   if (next_power > args.max):
@@ -33,10 +38,12 @@ def get_register_sizes(n, max_qubits):
   remainder = n % max_qubits
   return register_sizes if remainder == 0 else register_sizes + [remainder]
 
-def random_int(max):
+def random_int(max, remote=False):
   bits = ''
   n_bits = num_bits(max - 1)
   register_sizes = get_register_sizes(n_bits, MAX_QUBITS)
+  backend = "ibmqx4" if remote else "local_qasm_simulator"
+
   for x in register_sizes:
     q = QuantumRegister(x)
     c = ClassicalRegister(x)
@@ -45,7 +52,7 @@ def random_int(max):
     qc.h(q)
     qc.measure(q, c)
 
-    job_sim = execute(qc, "local_qasm_simulator", shots=1)
+    job_sim = execute(qc, backend, shots=1)
     sim_result = job_sim.result()
     counts = sim_result.get_counts(qc)
 
@@ -53,6 +60,10 @@ def random_int(max):
   return int(bits, 2)
 
 input = parse_input()
-result = random_int(input.max)
+
+if input.remote:
+  register(input.qx_token, QX_URL)
+
+result = random_int(input.max, input.remote)
 
 print(result)
