@@ -8,9 +8,9 @@ MAX_QUBITS = 5
 QX_URL = "https://quantumexperience.ng.bluemix.net/api"
 
 def parse_input():
-  parser=argparse.ArgumentParser()
+  parser = argparse.ArgumentParser()
   parser.add_argument('max', metavar='n', type=int, nargs='?', default=16, help='a maximum integer to generate')
-  parser.add_argument('--remote', action='store_true', default=False, help='run command on reale remote quantum processor')
+  parser.add_argument('--remote', action='store_true', default=False, help='run command on real remote quantum processor')
   parser.add_argument('--qx-token', nargs='?', help='api token for IBM Q Experience remote backend')
   args = parser.parse_args()
 
